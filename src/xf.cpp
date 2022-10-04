@@ -74,11 +74,11 @@ bool XF::iterate() {
 	return xf->lvconv;
 }
 
-tuple<double,double,double,double> XF::ALFA(double alpha){
+map<string,double> XF::ALFA(double alpha){
 	m_Iterations = 0;
 	if (!xf->initXFoilAnalysis(Re, 0, Mach, 9.0, 1.0, 1.0, 1, 1, true, ss)) {
 		std::cout << "Initialization error!" << std::endl;
-		return tuple<double,double,double,double>(xf->cl,xf->cd,xf->cm,xf->xcp);
+		return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp}};
 	}
 
 	xf->setBLInitialized(false);
@@ -91,7 +91,7 @@ tuple<double,double,double,double> XF::ALFA(double alpha){
 
 	if(!xf->specal()){
 		std::cout << "Invalid Analysis Settings\nCpCalc: local speed too large\n Compressibility corrections invalid ";
-		return tuple<double,double,double,double>(xf->cl,xf->cd,xf->cm,xf->xcp);
+		return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp}};
 	}
 
 	xf->lwake = false;
@@ -111,14 +111,14 @@ tuple<double,double,double,double> XF::ALFA(double alpha){
 	} else {
 		std::cout << "  unconverged" << std::endl;
 	}
-	return tuple<double,double,double,double>(xf->cl,xf->cd,xf->cm,xf->xcp);
+	return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp}};
 }
 
-tuple<double,double,double,double> XF::CL(double cl){
+map<string,double> XF::CL(double cl){
 	m_Iterations = 0;
 	if (!xf->initXFoilAnalysis(Re, 0, Mach, 9.0, 1.0, 1.0, 1, 1, true, ss)) {
 		std::cout << "Initialization error!" << std::endl;
-		return tuple<double,double,double,double>(xf->alfa,xf->cd,xf->cm,xf->xcp);
+		return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp}};
 	}
 
 	xf->setBLInitialized(m_bInitBL);
@@ -131,7 +131,7 @@ tuple<double,double,double,double> XF::CL(double cl){
 
 	if(!xf->specal()){
 		std::cout << "Invalid Analysis Settings\nCpCalc: local speed too large\n Compressibility corrections invalid ";
-		return tuple<double,double,double,double>(xf->alfa,xf->cd,xf->cm,xf->xcp);
+		return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp}};
 	}
 
 	xf->lwake = false;
@@ -151,5 +151,5 @@ tuple<double,double,double,double> XF::CL(double cl){
 	} else {
 		std::cout << "  unconverged" << std::endl;
 	}
-	return tuple<double,double,double,double>(xf->alfa,xf->cd,xf->cm,xf->xcp);
+	return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp}};
 }
