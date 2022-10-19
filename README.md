@@ -15,6 +15,7 @@ Just run this to install xfoil-py:
 
 ```shell
 $ git clone https://github.com/xsuz/xfoil-py
+$ cd xfoil-py
 $ pip install .
 ```
 
