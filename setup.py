@@ -5,7 +5,7 @@ from pybind11 import get_cmake_dir
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import setup
 
-__version__ = "0.0.1"
+__version__ = "0.0.3"
 
 # The main interface is through Pybind11Extension.
 # * You can add cxx_std=11/14/17, and then build_ext can be removed.
@@ -18,7 +18,7 @@ __version__ = "0.0.1"
 
 ext_modules = [
     Pybind11Extension("xfoil",
-        ["src/main.cpp","src/core/xfoil.cpp","src/core/foil.cpp","src/xf.cpp"],
+        ["src/main.cpp","src/core/xfoil.cpp","src/xf.cpp"],
         # Example: passing in the version to the compiled code
         define_macros = [('VERSION_INFO', __version__)],
         ),

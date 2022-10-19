@@ -1,29 +1,30 @@
-#ifndef LIB_XF_H
-#define LIB_XF_H
+#ifndef LIB_FOIL_H
+#define LIB_FOIL_H
 
-#include <map>
 #include "core/xfoil.hpp"
+#include <map>
+#include <vector>
 
 using namespace std;
 
 class XF{
 	public:
 		XF();
-		int LOAD(string filename);
-		//void TYPE(int mode);
-		void setRe(double val){Re=val;}
-		double getRe(){return Re;}
-		void setMach(double val){Mach=val;}
-		double getMach(){return Mach;}
-		void ITER(int n);
-		map<string,double> ALFA(double alpha);
-		//tuple<py::array_t<double>,py::array_t<double>,py::array_t<double>,py::array_t<double>> ASEQ(double start,double end,double step);
-		map<string,double> CL(double cl);
-		//tuple<py::array_t<double>,py::array_t<double>,py::array_t<double>,py::array_t<double>> CSEQ(double start,double end,double step);
+		int Load(string filename,bool primary);
+		void interpolate(double rate);
+		void iter(int n);
+		void tegap(double val);
+		map<string,double> calc(double alpha,double Re);
+		vector<double> getX()const;
+		vector<double> getY()const;
+		tuple<vector<double>,vector<double>> cpv(double alpha,double Re);
+		int save(string filename)const;
 	private:
+		double x1[IBX],x2[IBX],y1[IBX],y2[IBX];
+		int n1=0,n2=0;
 		bool iterate();
 		double Re=500000;
-		double Mach=0.0;
+		double interpolate_rate=0.5;
 		XFoil* xf;
 		// m_InitBL:境界層の影響を評価するかどうか
 		bool m_bInitBL=false;

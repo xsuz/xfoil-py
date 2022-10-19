@@ -1,15 +1,17 @@
-#include "xf.hpp"
+#include"xf.hpp"
 #include <iostream>
 #include <fstream>
 
-XF::XF(){
-	xf = new XFoil();
-}
 namespace{
 	stringstream ss;
-	int s_IterLim=100,m_Iterations=0L;
+	int s_IterLim=100,m_Iterations=0;
 }
-int XF::LOAD(string filename){
+
+XF::XF(){
+	xf=new XFoil();
+}
+
+int XF::Load(string filename,bool primary=true){
 	std::ifstream fs(filename);
 	if (!fs) {
 		std::cout << "Failed to open dat file" << std::endl;
@@ -20,7 +22,6 @@ int XF::LOAD(string filename){
 	std::getline(fs, line);
 	std::cout << "Foil name : " << line << std::endl;
 	int cnt = 0;
-	double x[IBX],y[IBX];
 	double nx[604],ny[604];
 	while (!fs.eof()) {
 		std::getline(fs, line);
@@ -29,15 +30,43 @@ int XF::LOAD(string filename){
 		if (endOfX == -1) continue;
 		std::string sx = line.substr(0, endOfX);
 		std::string sy = line.substr(endOfX);
-		x[cnt] = atof(sx.c_str());
-		y[cnt] = atof(sy.c_str());
+		if(primary){
+			x1[cnt] = atof(sx.c_str());
+			y1[cnt] = atof(sy.c_str());
+		}else{
+			x2[cnt] = atof(sx.c_str());
+			y2[cnt] = atof(sy.c_str());
+		}
 		cnt++;
 	}
-	if(!xf->initXFoilGeometry(cnt,x,y,nx,ny)){
-		std::cout << "Initialization error!" << std::endl;
-		return 1;
+	if(primary){
+		n1=cnt;
+		if(!xf->initXFoilGeometry(n1,x1,y1,nx,ny)){
+			std::cout << "Initialization error!" << std::endl;
+			return 1;
+		}
+	}else{
+		n2=cnt;
+		interpolate(interpolate_rate);
 	}
 	return cnt;
+}
+
+void XF::tegap(double val){
+	xf->tgap(val,0.8);
+	double x[IBX],y[IBX],nx[IBX],ny[IBX];
+	for(int j=0;j<n1;j++){
+		x[j]=xf->xb[j];
+		y[j]=xf->yb[j];
+	}
+	if(!xf->initXFoilGeometry(n1,x,y,nx,ny)){
+		std::cout << "Initialization error!" << std::endl;
+		return;
+	}
+}
+
+void XF::iter(int n=100){
+	s_IterLim=n;
 }
 
 bool XF::iterate() {
@@ -74,14 +103,32 @@ bool XF::iterate() {
 	return xf->lvconv;
 }
 
-map<string,double> XF::ALFA(double alpha){
-	m_Iterations = 0;
-	if (!xf->initXFoilAnalysis(Re, 0, Mach, 9.0, 1.0, 1.0, 1, 1, true, ss)) {
+void XF::interpolate(double rate=0.5){
+	if(n2==0 || n1==0){
+		std::cout << "ERROR:YOU MUST LOAD TWO FOILS BEFORE YOU INTERPOLATE FOILS";
+		return;
+	}
+	interpolate_rate=rate;
+	xf->interpolate(x1,y1,n1,x2,y2,n2,rate);
+	double x[IBX],y[IBX],nx[IBX],ny[IBX];
+	for(int j=0;j<n1;j++){
+		x[j]=xf->xb[j+1];
+		y[j]=xf->yb[j+1];
+	}
+	if(!xf->initXFoilGeometry(n1,x,y,nx,ny)){
 		std::cout << "Initialization error!" << std::endl;
-		return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp}};
+		return;
+	}
+}
+
+map<string,double> XF::calc(double alpha,double Re){
+	m_Iterations = 0;
+	if (!xf->initXFoilAnalysis(Re, 0, 0.0, 9.0, 1.0, 1.0, 1, 1, true, ss)) {
+		std::cout << "Initialization error!" << std::endl;
+		return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp},{"status",1}};
 	}
 
-	xf->setBLInitialized(false);
+	xf->setBLInitialized(m_bInitBL);
 	xf->lipan = false;
 
 	xf->setAlpha(alpha * 3.14159 / 180);
@@ -91,7 +138,7 @@ map<string,double> XF::ALFA(double alpha){
 
 	if(!xf->specal()){
 		std::cout << "Invalid Analysis Settings\nCpCalc: local speed too large\n Compressibility corrections invalid ";
-		return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp}};
+		return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp},{"status",1}};
 	}
 
 	xf->lwake = false;
@@ -105,33 +152,45 @@ map<string,double> XF::ALFA(double alpha){
 	if (xf->lvconv) {
 		std::cout << "  converged after " << m_Iterations << " iterations"
 			<< std::endl;
-		std::cout << "  cl : " << xf->cl << ", cd : " << xf->cd
-			<< ", cm : " << xf->cm << ", xcp : " << xf->xcp
-			<< std::endl;
+		return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp},{"status",0}};
 	} else {
 		std::cout << "  unconverged" << std::endl;
+		return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp},{"status",1}};
 	}
-	return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp}};
 }
 
-map<string,double> XF::CL(double cl){
+vector<double> XF::getX()const{
+	auto vec=vector<double>(xf->nb);
+	for(int i = 0;i<xf->nb;i++){
+		vec[i]=xf->xb[i+1];
+	}
+	return vec;
+}
+vector<double> XF::getY()const{
+	auto vec=vector<double>(xf->nb);
+	for(int i = 0;i<xf->nb;i++){
+		vec[i]=xf->yb[i+1];
+	}
+	return vec;
+}
+tuple<vector<double>,vector<double>> XF::cpv(double alpha,double Re){
 	m_Iterations = 0;
-	if (!xf->initXFoilAnalysis(Re, 0, Mach, 9.0, 1.0, 1.0, 1, 1, true, ss)) {
+	if (!xf->initXFoilAnalysis(Re, 0, 0.0, 9.0, 1.0, 1.0, 1, 1, true, ss)) {
 		std::cout << "Initialization error!" << std::endl;
-		return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp}};
+		return tuple<vector<double>,vector<double>>();
 	}
 
 	xf->setBLInitialized(m_bInitBL);
 	xf->lipan = false;
 
-	xf->setClSpec(cl * 3.14159 / 180);
-	xf->lalfa = false;
+	xf->setAlpha(alpha * 3.14159 / 180);
+	xf->lalfa = true;
 	xf->setQInf(1.0);
-	std::cout << "cl : " << cl << std::endl;
+	std::cout << "alpha : " << alpha << std::endl;
 
 	if(!xf->specal()){
 		std::cout << "Invalid Analysis Settings\nCpCalc: local speed too large\n Compressibility corrections invalid ";
-		return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp}};
+		return tuple<vector<double>,vector<double>>();
 	}
 
 	xf->lwake = false;
@@ -145,11 +204,27 @@ map<string,double> XF::CL(double cl){
 	if (xf->lvconv) {
 		std::cout << "  converged after " << m_Iterations << " iterations"
 			<< std::endl;
-		std::cout << "  alfa : " << xf->alfa << ", cd : " << xf->cd
-			<< ", cm : " << xf->cm << ", xcp : " << xf->xcp
-			<< std::endl;
+		auto cpv=vector<double>(xf->n);
+		auto x=vector<double>(xf->n);
+		for(int i = 0;i<xf->n;i++){
+			cpv[i]=xf->cpv[i+1];
+			x[i]=xf->xb[i+1];
+		}
+		return {x,cpv};
 	} else {
 		std::cout << "  unconverged" << std::endl;
+		return tuple<vector<double>,vector<double>>();
 	}
-	return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp}};
+}
+int XF::save(string filename)const{
+	ofstream ss=ofstream(filename);
+	if(!ss){
+		std::cout << "ERROR: CANNOT OPEN THE FILE";
+		return -1;
+	}
+	ss << filename;
+	for(int i=0;i<xf->nb;i++){
+		ss << xf->xb[i+1] << "\t" << xf->yb[i+1] << "\n";
+	}
+	return 0;
 }

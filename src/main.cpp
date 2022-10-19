@@ -1,6 +1,5 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "core/foil.hpp"
 #include "xf.hpp"
 
 #define STRINGIFY(x) #x
@@ -17,29 +16,22 @@ PYBIND11_MODULE(xfoil, m) {
         .. currentmodule:: xfoil
 
         .. autosummary::
+		:toctree: _generate
 
-	   XFoil
+		XF
     )pbdoc";
 
-	py::class_<XF>(m,"XFoil")
+	py::class_<XF>(m,"xf")
 		.def(py::init<>())
-		.def("load",&XF::LOAD)
-		.def_property("Re",&XF::getRe,&XF::setRe)
-		.def_property("Mach",&XF::getMach,&XF::setMach)
-		.def("alfa",&XF::ALFA)
-		.def("cl",&XF::CL);
-
-	py::class_<Foil>(m,"Foil")
-		.def(py::init<>())
-		.def("load",&Foil::Load)
-		.def("load_from_file",&Foil::Load_from_file)
-		.def("camber",&Foil::camber)
-		.def("xCamber",&Foil::xCamber)
-		.def("thickness",&Foil::thickness)
-		.def("xThickness",&Foil::xThickness)
-		.def("x",&Foil::get_x)
-		.def("y",&Foil::get_y)
-		.def("camberline",&Foil::getCamberLine);
+		.def("load",&XF::Load)
+		.def("calc",&XF::calc)
+		.def("cpv",&XF::cpv)
+		.def("iter",&XF::iter)
+		.def("tegap",&XF::tegap)
+		.def("interpolate",&XF::interpolate)
+		.def("getX",&XF::getX)
+		.def("getY",&XF::getY)
+		.def("save",&XF::save);
 
 #ifdef VERSION_INFO
 	m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
