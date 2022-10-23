@@ -4,7 +4,7 @@
 
 This is a package that enable us to use XFOIL with Python.
 
-![](https://xsuz.github.io/post/xfoil-with-python/img/xfoil_logo.gif)
+[![](https://xsuz.github.io/post/xfoil-with-python/img/xfoil_logo.gif)](https://web.mit.edu/drela/Public/web/xfoil/)
 
 Unlike xfoil, this module works cross-platform.
 
