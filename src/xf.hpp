@@ -13,7 +13,7 @@ class XF{
 		int Load(string filename,bool primary);
 		void interpolate(double rate);
 		void iter(int n);
-		void tegap(double val);
+		void tegap(double gapnew,double blend);
 		map<string,double> calc(double alpha,double Re);
 		vector<double> getX()const;
 		vector<double> getY()const;

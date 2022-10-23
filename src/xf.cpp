@@ -52,12 +52,12 @@ int XF::Load(string filename,bool primary=true){
 	return cnt;
 }
 
-void XF::tegap(double val){
-	xf->tgap(val,0.8);
+void XF::tegap(double gapnew,double blend){
+	xf->tgap(gapnew,blend);
 	double x[IBX],y[IBX],nx[IBX],ny[IBX];
-	for(int j=0;j<n1;j++){
-		x[j]=xf->xb[j];
-		y[j]=xf->yb[j];
+	for(int j=0;j<xf->nb;j++){
+		x[j]=xf->xb[j+1];
+		y[j]=xf->yb[j+1];
 	}
 	if(!xf->initXFoilGeometry(n1,x,y,nx,ny)){
 		std::cout << "Initialization error!" << std::endl;
@@ -111,7 +111,7 @@ void XF::interpolate(double rate=0.5){
 	interpolate_rate=rate;
 	xf->interpolate(x1,y1,n1,x2,y2,n2,rate);
 	double x[IBX],y[IBX],nx[IBX],ny[IBX];
-	for(int j=0;j<n1;j++){
+	for(int j=0;j<xf->nb;j++){
 		x[j]=xf->xb[j+1];
 		y[j]=xf->yb[j+1];
 	}
