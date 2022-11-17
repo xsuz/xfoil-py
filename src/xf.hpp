@@ -18,7 +18,7 @@ class XF{
 		vector<double> getX()const;
 		vector<double> getY()const;
 		tuple<vector<double>,vector<double>> cpv(double alpha,double Re);
-		int save(string filename)const;
+		int save(string foilname,string filename)const;
 	private:
 		double x1[IBX],x2[IBX],y1[IBX],y2[IBX];
 		int n1=0,n2=0;

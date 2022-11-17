@@ -108,14 +108,14 @@ void XF::interpolate(double rate=0.5){
 		std::cout << "ERROR:YOU MUST LOAD TWO FOILS BEFORE YOU INTERPOLATE FOILS";
 		return;
 	}
-	interpolate_rate=rate;
-	xf->interpolate(x1,y1,n1,x2,y2,n2,rate);
+	interpolate_rate=1-rate;
+	xf->interpolate(x1,y1,n1,x2,y2,n2,1-rate);
 	double x[IBX],y[IBX],nx[IBX],ny[IBX];
 	for(int j=0;j<xf->nb;j++){
 		x[j]=xf->xb[j+1];
 		y[j]=xf->yb[j+1];
 	}
-	if(!xf->initXFoilGeometry(n1,x,y,nx,ny)){
+	if(!xf->initXFoilGeometry(xf->nb,x,y,nx,ny)){
 		std::cout << "Initialization error!" << std::endl;
 		return;
 	}
@@ -216,15 +216,15 @@ tuple<vector<double>,vector<double>> XF::cpv(double alpha,double Re){
 		return tuple<vector<double>,vector<double>>();
 	}
 }
-int XF::save(string filename)const{
+int XF::save(string foilname,string filename)const{
 	ofstream ss=ofstream(filename);
 	if(!ss){
 		std::cout << "ERROR: CANNOT OPEN THE FILE";
 		return -1;
 	}
-	ss << filename;
+	ss << foilname;
 	for(int i=0;i<xf->nb;i++){
-		ss << xf->xb[i+1] << "\t" << xf->yb[i+1] << "\n";
+		ss << "\n" << xf->xb[i+1] << "\t" << xf->yb[i+1];
 	}
 	return 0;
 }
