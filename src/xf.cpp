@@ -224,7 +224,7 @@ int XF::save(string foilname,string filename)const{
 	}
 	ss << foilname;
 	for(int i=0;i<xf->nb;i++){
-		ss << "\n" << xf->xb[i+1] << "\t" << xf->yb[i+1];
+		ss << "\n" << xf->xb[i+1]/xf->xb[0] << "\t" << xf->yb[i+1]/xf->xb[0];
 	}
 	return 0;
 }
