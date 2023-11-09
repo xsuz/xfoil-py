@@ -20,7 +20,9 @@ int XF::Load(string filename,bool primary=true){
 
 	std::string line;
 	std::getline(fs, line);
-	std::cout << "Foil name : " << line << std::endl;
+	if (isDebug){
+		std::cout << "Foil name : " << line << std::endl;
+	}
 	int cnt = 0;
 	double nx[604],ny[604];
 	while (!fs.eof()) {
@@ -134,7 +136,9 @@ map<string,double> XF::calc(double alpha,double Re){
 	xf->setAlpha(alpha * 3.14159 / 180);
 	xf->lalfa = true;
 	xf->setQInf(1.0);
-	std::cout << "alpha : " << alpha << std::endl;
+	if(isDebug){
+		std::cout << "alpha = " << alpha << std::endl;
+	}
 
 	if(!xf->specal()){
 		std::cout << "Invalid Analysis Settings\nCpCalc: local speed too large\n Compressibility corrections invalid ";
@@ -150,8 +154,13 @@ map<string,double> XF::calc(double alpha,double Re){
 	//std::cout << ss.str() << std::endl;
 
 	if (xf->lvconv) {
-		std::cout << "  converged after " << m_Iterations << " iterations"
-			<< std::endl;
+		if(isDebug){
+			std::cout << "  converged after " << m_Iterations << " iterations"<< std::endl;
+			std::cout << "  cl = " << xf->cl << std::endl;
+			std::cout << "  cd = " << xf->cd << std::endl;
+			std::cout << "  cm = " << xf->cm << std::endl;
+			std::cout << "  xcp = " << xf->xcp << std::endl;
+		}
 		return map<string,double>{{"cl",xf->cl},{"cd",xf->cd},{"cm",xf->cm},{"xcp",xf->xcp},{"status",0}};
 	} else {
 		std::cout << "  unconverged" << std::endl;
@@ -186,7 +195,6 @@ tuple<vector<double>,vector<double>> XF::cpv(double alpha,double Re){
 	xf->setAlpha(alpha * 3.14159 / 180);
 	xf->lalfa = true;
 	xf->setQInf(1.0);
-	std::cout << "alpha : " << alpha << std::endl;
 
 	if(!xf->specal()){
 		std::cout << "Invalid Analysis Settings\nCpCalc: local speed too large\n Compressibility corrections invalid ";
@@ -202,8 +210,6 @@ tuple<vector<double>,vector<double>> XF::cpv(double alpha,double Re){
 	//std::cout << ss.str() << std::endl;
 
 	if (xf->lvconv) {
-		std::cout << "  converged after " << m_Iterations << " iterations"
-			<< std::endl;
 		auto cpv=vector<double>(xf->n);
 		auto x=vector<double>(xf->n);
 		for(int i = 0;i<xf->n;i++){
@@ -212,7 +218,6 @@ tuple<vector<double>,vector<double>> XF::cpv(double alpha,double Re){
 		}
 		return {x,cpv};
 	} else {
-		std::cout << "  unconverged" << std::endl;
 		return tuple<vector<double>,vector<double>>();
 	}
 }
@@ -224,7 +229,11 @@ int XF::save(string foilname,string filename)const{
 	}
 	ss << foilname;
 	for(int i=0;i<xf->nb;i++){
-		ss << "\n" << xf->xb[i+1]/xf->xb[0] << "\t" << xf->yb[i+1]/xf->xb[0];
+		ss << "\n" << xf->xb[i+1] << "\t" << xf->yb[i+1];
 	}
 	return 0;
+}
+
+void XF::setDebug(bool debug){
+	isDebug=debug;
 }

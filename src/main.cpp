@@ -31,7 +31,8 @@ PYBIND11_MODULE(xfoil, m) {
 		.def("interpolate",&XF::interpolate)
 		.def("getX",&XF::getX)
 		.def("getY",&XF::getY)
-		.def("save",&XF::save);
+		.def("save",&XF::save)
+		.def("setDebug",&XF::setDebug);
 
 #ifdef VERSION_INFO
 	m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);

@@ -19,6 +19,7 @@ class XF{
 		vector<double> getY()const;
 		tuple<vector<double>,vector<double>> cpv(double alpha,double Re);
 		int save(string foilname,string filename)const;
+		void setDebug(bool debug);
 	private:
 		double x1[IBX],x2[IBX],y1[IBX],y2[IBX];
 		int n1=0,n2=0;
@@ -30,6 +31,7 @@ class XF{
 		bool m_bInitBL=false;
 		// m_InitBL:境界層の影響を評価するかどうか
 		bool m_Viscous=true;
+		bool isDebug=false;
 };
 
 #endif
