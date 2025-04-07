@@ -7,11 +7,11 @@ namespace{
 	int s_IterLim=100,m_Iterations=0;
 }
 
-XF::XF(){
+XFoilTask::XFoilTask(){
 	xf=new XFoil();
 }
 
-int XF::Load(string filename,bool primary=true){
+int XFoilTask::Load(string filename,bool primary=true){
 	std::ifstream fs(filename);
 	if (!fs) {
 		std::cout << "Failed to open dat file" << std::endl;
@@ -54,7 +54,7 @@ int XF::Load(string filename,bool primary=true){
 	return cnt;
 }
 
-void XF::tegap(double gapnew,double blend){
+void XFoilTask::tegap(double gapnew,double blend){
 	xf->tgap(gapnew,blend);
 	double x[IBX],y[IBX],nx[IBX],ny[IBX];
 	for(int j=0;j<xf->nb;j++){
@@ -67,11 +67,11 @@ void XF::tegap(double gapnew,double blend){
 	}
 }
 
-void XF::iter(int n=100){
+void XFoilTask::iter(int n=100){
 	s_IterLim=n;
 }
 
-bool XF::iterate() {
+bool XFoilTask::iterate() {
 	if (!xf->viscal()) {
 		xf->lvconv = false;
 		std::cout
@@ -105,7 +105,7 @@ bool XF::iterate() {
 	return xf->lvconv;
 }
 
-void XF::interpolate(double rate=0.5){
+void XFoilTask::interpolate(double rate=0.5){
 	if(n2==0 || n1==0){
 		std::cout << "ERROR:YOU MUST LOAD TWO FOILS BEFORE YOU INTERPOLATE FOILS";
 		return;
@@ -123,7 +123,7 @@ void XF::interpolate(double rate=0.5){
 	}
 }
 
-map<string,double> XF::calc(double alpha,double Re){
+map<string,double> XFoilTask::calc(double alpha,double Re){
 	m_Iterations = 0;
 	if (!xf->initXFoilAnalysis(Re, 0, 0.0, 9.0, 1.0, 1.0, 1, 1, true, ss)) {
 		std::cout << "Initialization error!" << std::endl;
@@ -168,21 +168,21 @@ map<string,double> XF::calc(double alpha,double Re){
 	}
 }
 
-vector<double> XF::getX()const{
+vector<double> XFoilTask::getX()const{
 	auto vec=vector<double>(xf->nb);
 	for(int i = 0;i<xf->nb;i++){
 		vec[i]=xf->xb[i+1];
 	}
 	return vec;
 }
-vector<double> XF::getY()const{
+vector<double> XFoilTask::getY()const{
 	auto vec=vector<double>(xf->nb);
 	for(int i = 0;i<xf->nb;i++){
 		vec[i]=xf->yb[i+1];
 	}
 	return vec;
 }
-tuple<vector<double>,vector<double>> XF::cpv(double alpha,double Re){
+tuple<vector<double>,vector<double>> XFoilTask::cpv(double alpha,double Re){
 	m_Iterations = 0;
 	if (!xf->initXFoilAnalysis(Re, 0, 0.0, 9.0, 1.0, 1.0, 1, 1, true, ss)) {
 		std::cout << "Initialization error!" << std::endl;
@@ -221,19 +221,27 @@ tuple<vector<double>,vector<double>> XF::cpv(double alpha,double Re){
 		return tuple<vector<double>,vector<double>>();
 	}
 }
-int XF::save(string foilname,string filename)const{
+int XFoilTask::save(string foilname,string filename)const{
 	ofstream ss=ofstream(filename);
 	if(!ss){
 		std::cout << "ERROR: CANNOT OPEN THE FILE";
 		return -1;
 	}
 	ss << foilname;
+	
+	double x_max=0;
 	for(int i=0;i<xf->nb;i++){
-		ss << "\n" << xf->xb[i+1] << "\t" << xf->yb[i+1];
+		if(x_max<=xf->xb[i]){
+			x_max=xf->xb[i];
+		}
+	}
+
+	for(int i=0;i<xf->nb;i++){
+		ss << "\n" << xf->xb[i+1]/x_max << "\t" << xf->yb[i+1]/x_max;
 	}
 	return 0;
 }
 
-void XF::setDebug(bool debug){
+void XFoilTask::setDebug(bool debug){
 	isDebug=debug;
 }

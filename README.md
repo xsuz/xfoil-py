@@ -22,8 +22,8 @@ $ pip install .
 # Example
 
 ```python
-from xfoil import xf
-f=xf() # create instance
+from xfoil import XFoilTask
+f=XFoilTask() # create instance
 f.load("DAE41.dat",True) # Load primary foil
 f.calc(5,5e+5) # calculate cl,cd,cm and xcp from angle of attack(deg) and reynolds number
 f.load("DAE51.dat",False) # Load secondary foil

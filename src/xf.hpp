@@ -7,9 +7,9 @@
 
 using namespace std;
 
-class XF{
+class XFoilTask{
 	public:
-		XF();
+		XFoilTask();
 		int Load(string filename,bool primary);
 		void interpolate(double rate);
 		void iter(int n);

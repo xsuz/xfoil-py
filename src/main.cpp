@@ -18,21 +18,21 @@ PYBIND11_MODULE(xfoil, m) {
         .. autosummary::
 		:toctree: _generate
 
-		XF
+		XFoilTask
     )pbdoc";
 
-	py::class_<XF>(m,"xf")
+	py::class_<XFoilTask>(m,"XFoilTask")
 		.def(py::init<>())
-		.def("load",&XF::Load)
-		.def("calc",&XF::calc)
-		.def("cpv",&XF::cpv)
-		.def("iter",&XF::iter)
-		.def("tegap",&XF::tegap)
-		.def("interpolate",&XF::interpolate)
-		.def("getX",&XF::getX)
-		.def("getY",&XF::getY)
-		.def("save",&XF::save)
-		.def("setDebug",&XF::setDebug);
+		.def("load",&XFoilTask::Load)
+		.def("calc",&XFoilTask::calc)
+		.def("cpv",&XFoilTask::cpv)
+		.def("iter",&XFoilTask::iter)
+		.def("tegap",&XFoilTask::tegap)
+		.def("interpolate",&XFoilTask::interpolate)
+		.def("getX",&XFoilTask::getX)
+		.def("getY",&XFoilTask::getY)
+		.def("save",&XFoilTask::save)
+		.def("setDebug",&XFoilTask::setDebug);
 
 #ifdef VERSION_INFO
 	m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
